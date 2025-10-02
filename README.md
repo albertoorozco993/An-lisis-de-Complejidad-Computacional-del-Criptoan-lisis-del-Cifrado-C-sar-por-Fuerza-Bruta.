@@ -1,4 +1,6 @@
-# Criptoan-lisis-de-Cifrados-de-Sustituci-n-con-T-cnicas-de-Fuerza-Bruta
+# Criptoanálisis de Cifrados de Sustitución con Técnicas de Fuerza Bruta
+# Liceo de Cervantes
+#Alberto Orozco
 VS Code es ideal para este proyecto: soporta Python, depuración y extensiones.
 
 ## Cifrado César: 
