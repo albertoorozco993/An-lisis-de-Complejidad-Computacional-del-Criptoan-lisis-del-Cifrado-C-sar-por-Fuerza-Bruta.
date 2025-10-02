@@ -20,4 +20,5 @@ Total ops: ~676L + 676 (dominante en L).
 Asunciones: Alfabeto inglés uppercase (A-Z); textos generados con frecuencias reales para simular promedios. Tasa de éxito ~100% para L grande por convergencia estadística.
 Complejidad: Temporal O(676L) ≈ O(L); espacial O(1).
 
-# Codigo 
+
+[CODIGO](.docs/scripts.py)
