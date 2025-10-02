@@ -1,5 +1,5 @@
 # Criptoanálisis de Cifrados de Sustitución con Técnicas de Fuerza Bruta
-### Liceo de Cervantes
+### Liceo de Cervantes Barranquilla
 ### Alberto Orozco
 VS Code es ideal para este proyecto: soporta Python, depuración y extensiones.
 
