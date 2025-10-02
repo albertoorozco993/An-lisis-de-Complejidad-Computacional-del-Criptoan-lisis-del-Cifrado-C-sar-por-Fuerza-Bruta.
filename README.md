@@ -21,4 +21,4 @@ Asunciones: Alfabeto inglés uppercase (A-Z); textos generados con frecuencias r
 Complejidad: Temporal O(676L) ≈ O(L); espacial O(1).
 
 
-#CODIGO (script.py)
+# [CODIGO](script.py)
