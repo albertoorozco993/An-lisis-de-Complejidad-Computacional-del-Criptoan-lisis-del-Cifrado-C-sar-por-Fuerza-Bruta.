@@ -1,6 +1,6 @@
-import random  # Para generación aleatoria
-import string  # Para alfabeto A-Z
-import matplotlib.pyplot as plt  # Para gráficos
+import random
+import string
+import matplotlib.pyplot as plt
 
 EXPECTED_FREQS = {
     'A': 0.0817, 'B': 0.0149, 'C': 0.0278, 'D': 0.0425, 'E': 0.1270,
@@ -69,7 +69,7 @@ def break_caesar_naive(cipher_text, expected_freqs):
                     deciphered = chr((ord(char) - ord('A') - shift) % 26 + ord('A'))
                     if deciphered == target_letter:
                         count += 1
-                    comparisons += 1  # Conteo explícito
+                    comparisons += 1
             freq_count[target_letter] = count
         total_comparisons += comparisons
         
@@ -124,7 +124,7 @@ def run_simulation(lengths=[1000, 5000, 10000], num_trials=10):
         print(f"\nSimulando para L={L} ({num_trials} trials)...")
         for trial in range(num_trials):
             plain_text = generate_plain_text(L, EXPECTED_FREQS)
-            true_shift = random.randint(1, 25)  # Evita 0
+            true_shift = random.randint(1, 25)
             cipher_text = caesar_cipher(plain_text, true_shift)
             
             found_shift, ops, _, scores_list = break_caesar_naive(cipher_text, EXPECTED_FREQS)
@@ -138,7 +138,7 @@ def run_simulation(lengths=[1000, 5000, 10000], num_trials=10):
         
         avg_ops = sum(total_ops) / num_trials
         success_rate = (successes / num_trials) * 100
-        theoretical = 26 * 26 * L + 26 * 26  # 676L + 676
+        theoretical = 26 * 26 * L + 26 * 26 
         results[L] = {'avg_ops': avg_ops, 'success_rate': success_rate}
         
         print(f"  - Ops promedio: {avg_ops:.0f} (Teórico: {theoretical})")
@@ -147,7 +147,6 @@ def run_simulation(lengths=[1000, 5000, 10000], num_trials=10):
         if example_scores:
             plot_scores_example(example_scores, example_true_shift, L)
     
-    # Tabla Resumen
     print("\nResumen Final:")
     print("| Longitud L | Ops Promedio | Tasa Éxito (%) |")
     print("|------------|--------------|----------------|")
@@ -156,6 +155,5 @@ def run_simulation(lengths=[1000, 5000, 10000], num_trials=10):
     
     return results
 
-# Ejecución Principal
 if __name__ == "__main__":
     run_simulation()
