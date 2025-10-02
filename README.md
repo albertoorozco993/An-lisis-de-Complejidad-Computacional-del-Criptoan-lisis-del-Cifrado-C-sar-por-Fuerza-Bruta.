@@ -19,3 +19,5 @@ Total ops: ~676L + 676 (dominante en L).
 "¿Cuántas operaciones de comparación de frecuencias se requieren, en promedio, para romper un cifrado César en textos de L ∈ {1000, 5000, 10000}, y cómo crece con L?" Respuesta: Determinista ~676L + 676 por trial; crece linealmente (O(L)).
 Asunciones: Alfabeto inglés uppercase (A-Z); textos generados con frecuencias reales para simular promedios. Tasa de éxito ~100% para L grande por convergencia estadística.
 Complejidad: Temporal O(676L) ≈ O(L); espacial O(1).
+
+# Codigo 
