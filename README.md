@@ -1,7 +1,8 @@
 # Criptoanálisis de Cifrados de Sustitución con Técnicas de Fuerza Bruta
 ### Liceo de Cervantes Barranquilla
 ### Alberto Orozco
-VS Code es ideal para este proyecto: soporta Python, depuración y extensiones.
+
+
 
 ## Cifrado César: 
 Un cifrado de sustitución simple donde cada letra se desplaza por un valor fijo k (clave, 0 ≤ k < 26) en el alfabeto. Ejemplo: "A" con k=3 → "D". Matemáticamente: c = (p + k) mod 26.
