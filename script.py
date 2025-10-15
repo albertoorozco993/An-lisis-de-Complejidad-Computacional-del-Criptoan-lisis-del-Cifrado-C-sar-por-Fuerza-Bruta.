@@ -1,159 +1,143 @@
-import random
 import string
-import matplotlib.pyplot as plt
+from typing import Tuple, Dict, List
 
-EXPECTED_FREQS = {
-    'A': 0.0817, 'B': 0.0149, 'C': 0.0278, 'D': 0.0425, 'E': 0.1270,
-    'F': 0.0223, 'G': 0.0202, 'H': 0.0609, 'I': 0.0697, 'J': 0.0015,
-    'K': 0.0077, 'L': 0.0403, 'M': 0.0241, 'N': 0.0675, 'O': 0.0751,
-    'P': 0.0193, 'Q': 0.0009, 'R': 0.0599, 'S': 0.0633, 'T': 0.0906,
-    'U': 0.0276, 'V': 0.0098, 'W': 0.0236, 'X': 0.0015, 'Y': 0.0197, 'Z': 0.0007
+# Frecuencias del idioma español (Fuente: datos estadísticos)
+FRECUENCIAS_ESPANOL: Dict[str, float] = {
+    'A': 0.1253, 'B': 0.0142, 'C': 0.0468, 'D': 0.0586, 'E': 0.1368,
+    'F': 0.0069, 'G': 0.0101, 'H': 0.0070, 'I': 0.0625, 'J': 0.0044,
+    'K': 0.0000, 'L': 0.0524, 'M': 0.0301, 'N': 0.0742, 'O': 0.0962,
+    'P': 0.0250, 'Q': 0.0092, 'R': 0.0687, 'S': 0.0798, 'T': 0.0463,
+    'U': 0.0393, 'V': 0.0090, 'W': 0.0000, 'X': 0.0017, 'Y': 0.0090,
+    'Z': 0.0049
 }
 
-def generate_plain_text(length, expected_freqs):
-    """
-    Genera un texto plano de longitud 'length' siguiendo las frecuencias esperadas.
-    - Por qué: Simula textos realistas para pruebas representativas.
-    - Cómo: Selección probabilística cumulativa.
-    - Retorna: str (texto uppercase).
-    """
-    text = ''
-    total_freq = sum(expected_freqs.values())
-    for _ in range(length):
-        rand = random.random() * total_freq
-        cumulative = 0
-        for letter, freq in expected_freqs.items():
-            cumulative += freq
-            if rand <= cumulative:
-                text += letter
-                break
+def descifrar_cesar(texto_cifrado: str, clave: int) -> str:
+    """Aplica la fórmula modular p = (c - k) mod 26 para descifrar."""
+    resultado = ""
+    # O(L) - Bucle lineal sobre la longitud del texto
+    for char in texto_cifrado.upper():
+        if 'A' <= char <= 'Z':
+            # 1. Mapear a 0-25
+            valor_ascii = ord(char) - ord('A')
+            # 2. Aplicar la fórmula: asegura que el resultado es positivo con +26
+            valor_descifrado = (valor_ascii - clave + 26) % 26
+            # 3. Mapear de vuelta a letra
+            resultado += chr(valor_descifrado + ord('A'))
         else:
-            text += 'E'  
-    return text
+            resultado += char
+    return resultado
 
-def caesar_cipher(text, shift):
+def calcular_puntuacion(texto_candidato: str) -> Tuple[float, int]:
     """
-    Cifra el texto con desplazamiento 'shift'.
-    - Por qué: Implementa el cifrado base.
-    - Cómo: Aritmética modular mod 26.
-    - Retorna: str (texto cifrado).
+    Calcula el Error Cuadrático Medio (MSE) de las frecuencias.
+    Retorna la puntuación (MSE) y el coste de operaciones (O(L) + O(Sigma)).
     """
-    result = ''
-    for char in text:
-        if char.isalpha():
-            base = ord('A')
-            result += chr((ord(char) - base + shift) % 26 + base)
-        else:
-            result += char
-    return result
+    operaciones: int = 0
+    frecuencias_observadas: Dict[str, int] = {}
+    total_letras: int = 0
 
-def break_caesar_naive(cipher_text, expected_freqs):
-    """
-    Rompe el cifrado con fuerza bruta naiva, contando comparaciones.
-    - Por qué: Mide ops para tu pregunta (676L + 676 approx).
-    - Cómo: Para cada shift, conteo naivo (26 letras × L escaneos) + score.
-    - Retorna: (best_shift, total_comparisons, best_score, scores_list).
-    """
-    total_comparisons = 0
-    best_shift = 0
-    best_score = float('inf')
-    scores = []
+    # 1. O(L): Conteo de frecuencias y coste lineal
+    for char in texto_candidato.upper():
+        operaciones += 1  # Coste 1: Lectura y procesamiento de cada caracter (FACTOR L)
+        if 'A' <= char <= 'Z':
+            frecuencias_observadas[char] = frecuencias_observadas.get(char, 0) + 1
+            total_letras += 1
     
-    for shift in range(26):
-        comparisons = 0
-        freq_count = {letter: 0 for letter in string.ascii_uppercase}
-        for target_letter in string.ascii_uppercase:
-            count = 0
-            for char in cipher_text:
-                if char.isalpha():
-                    deciphered = chr((ord(char) - ord('A') - shift) % 26 + ord('A'))
-                    if deciphered == target_letter:
-                        count += 1
-                    comparisons += 1
-            freq_count[target_letter] = count
-        total_comparisons += comparisons
-        
-        score_comparisons = 0
-        score = 0
-        text_length = len(cipher_text)
-        for letter in string.ascii_uppercase:
-            obs_freq = freq_count[letter] / text_length if text_length > 0 else 0
-            diff = abs(obs_freq - expected_freqs[letter])
-            score += diff
-            score_comparisons += 1
-        total_comparisons += score_comparisons
-        scores.append(score)
-        
-        if score < best_score:
-            best_score = score
-            best_shift = shift
-    
-    return best_shift, total_comparisons, best_score, scores
+    if total_letras == 0:
+        return 1e9, operaciones
 
-def plot_scores_example(scores, true_shift, L):
-    """
-    Gráfica scores vs. shifts para demo.
-    - Por qué: Visualiza el mínimo en el shift correcto.
-    - Cómo: Plot con Matplotlib.
-    """
-    shifts = range(26)
-    plt.figure(figsize=(10, 6))
-    plt.plot(shifts, scores, marker='o', label=f'Scores para L={L}')
-    plt.axvline(true_shift, color='r', linestyle='--', label='Shift Verdadero')
-    plt.xlabel('Shift Probado')
-    plt.ylabel('Score (Diferencias Absolutas)')
-    plt.title('Análisis de Frecuencias en Acción')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # 2. O(|Sigma|): Cálculo del MSE (La constante 26)
+    puntuacion: float = 0.0
+    for char in string.ascii_uppercase:
+        operaciones += 1  # Coste 2: Una operación por cada letra (FACTOR 26)
+        
+        # Calcular frecuencias relativas
+        frec_observada = frecuencias_observadas.get(char, 0) / total_letras
+        frec_esperada = FRECUENCIAS_ESPANOL.get(char, 0)
+        
+        # Sumar el error cuadrático (MSE)
+        puntuacion += (frec_observada - frec_esperada) ** 2
 
-def run_simulation(lengths=[1000, 5000, 10000], num_trials=10):
+    # Una puntuación más baja indica una mayor similitud con el español
+    return puntuacion, operaciones
+
+def criptoanalisis_fuerza_bruta(texto_cifrado: str) -> Tuple[int, str, int]:
     """
-    Simula múltiples trials para cada L y responde tu pregunta.
-    - Por qué: Calcula promedios y genera visuals.
-    - Cómo: Genera/cifra/rompe; mide ops/éxito.
-    - Retorna: dict con resultados.
+    Función principal de criptoanalisis. Itera las 26 claves.
+    Complejidad Total: O(|Sigma| * L) => O(L)
     """
-    results = {}
-    for L in lengths:
-        total_ops = []
-        successes = 0
-        example_scores = None
-        example_true_shift = None
-        
-        print(f"\nSimulando para L={L} ({num_trials} trials)...")
-        for trial in range(num_trials):
-            plain_text = generate_plain_text(L, EXPECTED_FREQS)
-            true_shift = random.randint(1, 25)
-            cipher_text = caesar_cipher(plain_text, true_shift)
-            
-            found_shift, ops, _, scores_list = break_caesar_naive(cipher_text, EXPECTED_FREQS)
-            total_ops.append(ops)
-            if found_shift == true_shift:
-                successes += 1
-            
-            if trial == 0:
-                example_scores = scores_list
-                example_true_shift = true_shift
-        
-        avg_ops = sum(total_ops) / num_trials
-        success_rate = (successes / num_trials) * 100
-        theoretical = 26 * 26 * L + 26 * 26 
-        results[L] = {'avg_ops': avg_ops, 'success_rate': success_rate}
-        
-        print(f"  - Ops promedio: {avg_ops:.0f} (Teórico: {theoretical})")
-        print(f"  - Tasa de éxito: {success_rate:.1f}%")
-        
-        if example_scores:
-            plot_scores_example(example_scores, example_true_shift, L)
+    mejor_puntuacion: float = 1e9  # Inicialización a valor muy alto
+    mejor_clave: int = 0
+    mejor_texto: str = ""
+    operaciones_totales: int = 0
     
-    print("\nResumen Final:")
-    print("| Longitud L | Ops Promedio | Tasa Éxito (%) |")
-    print("|------------|--------------|----------------|")
-    for L, data in results.items():
-        print(f"| {L:10} | {data['avg_ops']:12.0f} | {data['success_rate']:14.1f} |")
+    # Bucle Principal O(|Sigma|)
+    for k in range(26):
+        operaciones_totales += 1 # Contar la iteración del bucle principal (FACTOR 26)
+        
+        # 1. Descifrado O(L) - La complejidad está dominada por aquí.
+        texto_descifrado = descifrar_cesar(texto_cifrado, k)
+        
+        # 2. Puntuación O(L + |Sigma|)
+        puntuacion_actual, ops_puntuacion = calcular_puntuacion(texto_descifrado)
+        
+        # Sumar el coste total acumulado de la iteración
+        operaciones_totales += ops_puntuacion
+        
+        # 3. Actualización del mejor resultado
+        if puntuacion_actual < mejor_puntuacion:
+            mejor_puntuacion = puntuacion_actual
+            mejor_clave = k
+            mejor_texto = texto_descifrado
+
+    return mejor_clave, mejor_texto, operaciones_totales
+
+# --- PRUEBAS AUTOMATIZADAS Y ANÁLISIS DE LINEALIDAD ---
+
+def ejecutar_analisis_linealidad(texto_base: str, clave: int = 5):
+    """
+    Genera dos textos, uno el doble de largo que el otro, para probar la linealidad O(L).
+    """
+    print("\n--- ANÁLISIS DE VALIDACIÓN O(L) ---")
     
-    return results
+    # Generar Caso 1: L_pequeña (ej. 100 caracteres)
+    L1_texto = texto_base * 2 
+    texto_cifrado_L1 = descifrar_cesar(L1_texto, clave)
+    
+    # Generar Caso 2: L_grande (el doble de L1)
+    L2_texto = texto_base * 4 
+    texto_cifrado_L2 = descifrar_cesar(L2_texto, clave)
+    
+    # 1. Ejecutar y medir el coste
+    _, _, ops_L1 = criptoanalisis_fuerza_bruta(texto_cifrado_L1)
+    _, _, ops_L2 = criptoanalisis_fuerza_bruta(texto_cifrado_L2)
+    
+    proporcion_L = len(texto_cifrado_L2) / len(texto_cifrado_L1)
+    proporcion_ops = ops_L2 / ops_L1
+    
+    print(f"L1 (Longitud): {len(texto_cifrado_L1):<5} | Operaciones: {ops_L1}")
+    print(f"L2 (Longitud): {len(texto_cifrado_L2):<5} | Operaciones: {ops_L2}")
+    print(f"Relación Longitud (L2/L1): {proporcion_L:.2f}")
+    print(f"Relación Coste (Ops2/Ops1): {proporcion_ops:.2f}")
+
+    # Afirmación clave de O(L): La proporción debe ser cercana a 2.0
+    assert 1.95 < proporcion_ops < 2.05, "La complejidad no es lineal O(L)!"
+    print("\n✅ VALIDACIÓN O(L) EXITOSA: El coste se duplica al duplicar la longitud, confirmando la linealidad.")
+    
+def ejecutar_pruebas_correccion():
+    """Prueba simple para validar que la clave se encuentra correctamente."""
+    texto_claro_base = "ESTEESUNTEXTOMUYLARGOENLENGUAJECASCASTELLANO"
+    texto_cifrado = descifrar_cesar(texto_claro_base, 5) # Clave: 5
+    
+    clave_encontrada, texto_descifrado, ops = criptoanalisis_fuerza_bruta(texto_cifrado)
+    
+    assert clave_encontrada == 5
+    assert texto_descifrado == texto_claro_base.upper()
+    print(f"\n--- PRUEBA DE CORRECCIÓN EXITOSA ---")
+    print(f"Clave Encontrada: {clave_encontrada} | Coste Total: {ops}")
+    
+    return texto_claro_base
 
 if __name__ == "__main__":
-    run_simulation()
+    texto_base = ejecutar_pruebas_correccion()
+    ejecutar_analisis_linealidad(texto_base)
