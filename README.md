@@ -1,4 +1,3 @@
-# [CODIGO](script.py)
 # Informe Técnico: Análisis de Complejidad Computacional del Criptoanálisis del Cifrado César
 
 ![Análisis Computacional](https://img.shields.io/badge/Análisis-Complejidad_Computacional-blue.svg)
